@@ -22,7 +22,7 @@ FILENAME_ADV = 'nickname.json'
 ANIM_TYPES = ['none', 'led', 'fade']
 
 
-def render_error(err1, err2)
+def render_error(err1, err2):
     with display.open() as disp:
         disp.clear()
         disp.print(err1, posx=80 - round(len(err1) / 2 * 14), posy=18)

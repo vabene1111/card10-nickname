@@ -1,15 +1,15 @@
 {
-  "nickname": "nick",
-  "subtitle": "sub",
+  "nickname": "card10",
+  "subtitle": "cccamp2019",
   "background": [33,66,99],
-  "fg_color": [0,0,255],
-  "bg_color": [0,255,0],
-  "fg_sub_color": [255,0,0],
-  "bg_sub_color": [0,255,0],
+  "fg_color": [200,0,0],
+  "bg_color": [33,66,99],
+  "fg_sub_color": [0,255,0],
+  "bg_sub_color": [33,66,99],
 
   "background_night": [33,66,99],
   "fg_color_night": [0,0,255],
-  "bg_color_night": [0,255,0],
+  "bg_color_night": [33,66,99],
   "fg_sub_color_night": [255,0,0],
-  "bg_sub_color_night": [0,255,0]
+  "bg_sub_color_night": [33,66,99]
 }
