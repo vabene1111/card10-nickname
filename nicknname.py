@@ -3,35 +3,44 @@ Improvement ideas
 - animations
     - dvd
     - rainbow
+    - led control
+    - fade effekt
 - led nick writing
 """
 
 import utime
 import display
+import leds
+import ledfx
+import buttons
 import light_sensor
 import ujson
 import os
 
 FILENAME = 'nickname.txt'
 FILENAME_ADV = 'nickname.json'
+ANIM_TYPES = ['none', 'led', 'fade']
 
 
 def render_error(err1, err2)
     with display.open() as disp:
         disp.clear()
-        disp.print(err1, posx=80 - round(len(title) / 2 * 14), posy=18)
-        disp.print(err2, posx=80 - round(len(sub) / 2 * 14), posy=42)
+        disp.print(err1, posx=80 - round(len(err1) / 2 * 14), posy=18)
+        disp.print(err2, posx=80 - round(len(err2) / 2 * 14), posy=42)
         disp.update()
         disp.close()
 
 
 def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, background):
+    anim = 'none'
     posy = 30
     if sub != '':
         posy = 18
+    r = 255
+    g = 0
+    b = 0
     while True:
         dark = 0
-        print(light_sensor.get_reading())
         if light_sensor.get_reading() < 30:
             dark = 1
         r_fg_color = fg[dark]
@@ -39,6 +48,24 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, background):
         r_fg_sub_color = fg_sub[dark]
         r_bg_sub_color = bg_sub[dark]
         r_bg = background[dark]
+        if anim == 'fade':
+            if r > 0 and b == 0:
+                r = r - 1
+                g = g + 1
+            if g > 0 and r == 0:
+                g = g - 1
+                b = b + 1
+            if b > 0 and g == 0:
+                r = r + 1
+                b = b - 1
+            r_bg = [r, g, b]
+        if anim == 'led':
+            for i in range(0, 11):
+                leds.prep(i, r_bg)
+            leds.update()
+            leds.dim_top(3)
+        if anim == 'none':
+            leds.clear()
         with display.open() as disp:
             disp.rect(0, 0, 160, 80, col=r_bg, filled=True)
             disp.print(title, fg=r_fg_color, bg=r_bg_color, posx=80 - round(len(title) / 2 * 14), posy=posy)
@@ -46,6 +73,13 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, background):
                 disp.print(sub, fg=r_fg_sub_color, bg=r_bg_sub_color, posx=80 - round(len(sub) / 2 * 14), posy=42)
             disp.update()
             disp.close()
+        pressed = buttons.read(
+            buttons.BOTTOM_LEFT | buttons.BOTTOM_RIGHT
+        )
+        if pressed & buttons.BOTTOM_LEFT != 0:
+            anim = ANIM_TYPES[1]
+        if pressed & buttons.BOTTOM_RIGHT != 0:
+            anim = ANIM_TYPES[0]
         utime.sleep(2)
 
 
@@ -56,6 +90,7 @@ def get_key(json, key, default):
         return default
 
 
+leds.clear()
 with display.open() as disp:
     disp.clear().update()
     disp.close()
