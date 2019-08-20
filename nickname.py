@@ -31,8 +31,8 @@ def render_error(err1, err2):
         disp.close()
 
 
-def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, background):
-    anim = 'none'
+def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg):
+    anim = 'led'
     posy = 30
     if sub != '':
         posy = 18
@@ -47,7 +47,7 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, background):
         r_bg_color = bg[dark]
         r_fg_sub_color = fg_sub[dark]
         r_bg_sub_color = bg_sub[dark]
-        r_bg = background[dark]
+        r_bg = main_bg[dark]
         if anim == 'fade':
             if r > 0 and b == 0:
                 r = r - 1
@@ -64,8 +64,14 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, background):
                 leds.prep(i, r_bg)
             leds.update()
             leds.dim_top(3)
+            leds.set_rocket(0, 15)
+            leds.set_rocket(1, 15)
+            leds.set_rocket(2, 15)
         if anim == 'none':
             leds.clear()
+            leds.set_rocket(0, 0)
+            leds.set_rocket(1, 0)
+            leds.set_rocket(2, 0)
         with display.open() as disp:
             disp.rect(0, 0, 160, 80, col=r_bg, filled=True)
             disp.print(title, fg=r_fg_color, bg=r_bg_color, posx=80 - round(len(title) / 2 * 14), posy=posy)
@@ -80,7 +86,7 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, background):
             anim = ANIM_TYPES[1]
         if pressed & buttons.BOTTOM_RIGHT != 0:
             anim = ANIM_TYPES[0]
-        utime.sleep(2)
+        utime.sleep(0.3)
 
 
 def get_key(json, key, default):
@@ -104,17 +110,17 @@ if FILENAME_ADV in os.listdir("."):
         nick = get_key(c, 'nickname', 'no nick')
         sub = get_key(c, 'subtitle', '')
         # daytime values
-        fg_color = get_key(c, 'fg_color', [255, 255, 255])
-        bg_color = get_key(c, 'bg_color', [0, 0, 0])
-        fg_sub_color = get_key(c, 'fg_sub_color', [255, 255, 255])
-        bg_sub_color = get_key(c, 'bg_sub_color', [0, 0, 0])
         background = get_key(c, 'background', [0, 0, 0])
+        fg_color = get_key(c, 'fg_color', [255, 255, 255])
+        bg_color = get_key(c, 'bg_color', background)
+        fg_sub_color = get_key(c, 'fg_sub_color', [255, 255, 255])
+        bg_sub_color = get_key(c, 'bg_sub_color', background)
         # nighttime values
-        fg_color_night = get_key(c, 'fg_color_night', [255, 255, 255])
-        bg_color_night = get_key(c, 'bg_color_night', [0, 0, 0])
-        fg_sub_color_night = get_key(c, 'fg_sub_color_night', [255, 255, 255])
-        bg_sub_color_night = get_key(c, 'bg_sub_color_night', [0, 0, 0])
         background_night = get_key(c, 'background_night', [0, 0, 0])
+        fg_color_night = get_key(c, 'fg_color_night', [255, 255, 255])
+        bg_color_night = get_key(c, 'bg_color_night', background_night)
+        fg_sub_color_night = get_key(c, 'fg_sub_color_night', [255, 255, 255])
+        bg_sub_color_night = get_key(c, 'bg_sub_color_night', background_night)
         # render nickname
         render_nickname(nick, sub, (fg_color, fg_color_night), (bg_color, bg_color_night),
                         (fg_sub_color, fg_sub_color_night), (bg_sub_color, bg_sub_color_night),
@@ -130,6 +136,8 @@ else:
         f.close()
         if len(nick) > 11:
             render_error('name too', 'long')
+        if len(nick) < 1:
+            render_error('nick file', 'empty')
         else:
             render_nickname(nick, '', ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
                             ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]))

@@ -4,6 +4,7 @@ Nickname app for the card10 badge #cccamp2019
 ## Features
 - Simple and advanced mode
 - customizable colors
+- turon on/off led (hold button for a few seconds right=off/left=on)
 - automatic day/night mode
 
 # Simple
