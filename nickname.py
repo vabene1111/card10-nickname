@@ -6,8 +6,9 @@ Improvement ideas
     - led control
     - fade effekt
 - led nick writing
+CA:4D:10
+CA:4D:10:8f:40:fc
 """
-
 import utime
 import display
 import leds
@@ -19,7 +20,7 @@ import os
 
 FILENAME = 'nickname.txt'
 FILENAME_ADV = 'nickname.json'
-ANIM_TYPES = ['none', 'led', 'fade']
+ANIM_TYPES = ['none', 'led', 'fade', 'gay']
 
 
 def render_error(err1, err2):
@@ -31,24 +32,70 @@ def render_error(err1, err2):
         disp.close()
 
 
+def get_time():
+    timestamp = ''
+    if utime.localtime()[3] < 10:
+        timestamp = timestamp + '0'
+    timestamp = timestamp + str(utime.localtime()[3]) + ':'
+    if utime.localtime()[4] < 10:
+        timestamp = timestamp + '0'
+    timestamp = timestamp + str(utime.localtime()[4]) + ':'
+    if utime.localtime()[5] < 10:
+        timestamp = timestamp + '0'
+    timestamp = timestamp + str(utime.localtime()[5])
+    return timestamp
+
+
+def toggle_rockets(state):
+    brightness = 15
+    if not state:
+        brightness = 0
+    leds.set_rocket(0, brightness)
+    leds.set_rocket(1, brightness)
+    leds.set_rocket(2, brightness)
+
+
 def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg):
-    anim = 'led'
+    anim = 0
     posy = 30
     if sub != '':
         posy = 18
     r = 255
     g = 0
     b = 0
+    r_sub = sub
+    last_btn_poll = utime.time() - 2
     while True:
+        sleep = 0.5
+        if sub == '#time':
+            r_sub = get_time()
         dark = 0
-        if light_sensor.get_reading() < 30:
+        if light_sensor.get_reading() < 40:
             dark = 1
         r_fg_color = fg[dark]
         r_bg_color = bg[dark]
         r_fg_sub_color = fg_sub[dark]
         r_bg_sub_color = bg_sub[dark]
         r_bg = main_bg[dark]
-        if anim == 'fade':
+        # Button handling
+        pressed = buttons.read(
+            buttons.BOTTOM_LEFT | buttons.BOTTOM_RIGHT
+        )
+        if utime.time() - last_btn_poll >= 1:
+            last_btn_poll = utime.time()
+            if pressed & buttons.BOTTOM_RIGHT != 0:
+                anim = anim + 1
+                if anim >= len(ANIM_TYPES):
+                    anim = 0
+            if pressed & buttons.BOTTOM_LEFT != 0:
+                anim = anim - 1
+                if anim < 0:
+                    anim = len(ANIM_TYPES) - 1
+        # Animations
+        if ANIM_TYPES[anim] == 'fade':
+            sleep = 0.1
+            leds.clear()
+            toggle_rockets(False)
             if r > 0 and b == 0:
                 r = r - 1
                 g = g + 1
@@ -59,34 +106,32 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg):
                 r = r + 1
                 b = b - 1
             r_bg = [r, g, b]
-        if anim == 'led':
-            for i in range(0, 11):
-                leds.prep(i, r_bg)
-            leds.update()
-            leds.dim_top(3)
-            leds.set_rocket(0, 15)
-            leds.set_rocket(1, 15)
-            leds.set_rocket(2, 15)
-        if anim == 'none':
+            r_bg_color = r_bg
+            r_bg_sub_color = r_bg
+        if ANIM_TYPES[anim] == 'led':
+            if dark == 1:
+                for i in range(0, 11):
+                    leds.prep(i, r_bg)
+                leds.update()
+                leds.dim_top(4)
+                toggle_rockets(True)
+            else:
+                leds.clear()
+                toggle_rockets(False)
+        if ANIM_TYPES[anim] == 'gay':
+            toggle_rockets(False)
+            leds.gay(0.4)
+        if ANIM_TYPES[anim] == 'none':
             leds.clear()
-            leds.set_rocket(0, 0)
-            leds.set_rocket(1, 0)
-            leds.set_rocket(2, 0)
+            toggle_rockets(False)
         with display.open() as disp:
             disp.rect(0, 0, 160, 80, col=r_bg, filled=True)
             disp.print(title, fg=r_fg_color, bg=r_bg_color, posx=80 - round(len(title) / 2 * 14), posy=posy)
-            if sub != '':
-                disp.print(sub, fg=r_fg_sub_color, bg=r_bg_sub_color, posx=80 - round(len(sub) / 2 * 14), posy=42)
+            if r_sub != '':
+                disp.print(r_sub, fg=r_fg_sub_color, bg=r_bg_sub_color, posx=80 - round(len(r_sub) / 2 * 14), posy=42)
             disp.update()
             disp.close()
-        pressed = buttons.read(
-            buttons.BOTTOM_LEFT | buttons.BOTTOM_RIGHT
-        )
-        if pressed & buttons.BOTTOM_LEFT != 0:
-            anim = ANIM_TYPES[1]
-        if pressed & buttons.BOTTOM_RIGHT != 0:
-            anim = ANIM_TYPES[0]
-        utime.sleep(0.3)
+        utime.sleep(sleep)
 
 
 def get_key(json, key, default):
@@ -95,12 +140,10 @@ def get_key(json, key, default):
     except KeyError:
         return default
 
-
 leds.clear()
 with display.open() as disp:
     disp.clear().update()
     disp.close()
-
 if FILENAME_ADV in os.listdir("."):
     f = open(FILENAME_ADV, 'r')
     try:
