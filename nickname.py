@@ -24,6 +24,11 @@ ANIM_TYPES = ['none', 'led', 'fade', 'gay']
 
 
 def render_error(err1, err2):
+    """
+    Function to render two lines of text (each max 11 chars). Useful to display error messages
+    :param err1: line one
+    :param err2: line two
+    """
     with display.open() as disp:
         disp.clear()
         disp.print(err1, posx=80 - round(len(err1) / 2 * 14), posy=18)
@@ -33,9 +38,16 @@ def render_error(err1, err2):
 
 
 def get_bat_color(bat):
+    """
+    Function determines the color of the battery indicator. Colors can be set in config.
+    Voltage threshold's are currently estimates as voltage isn't that great of an indicator for
+    battery charge.
+    :param bat: battery config tuple (boolean: indicator on/off, array: good rgb, array: ok rgb, array: bad rgb)
+    :return: false if old firmware, RGB color array otherwise
+    """
     try:
         v = os.read_battery()
-        if v > 3.9:
+        if v > 3.8:
             return bat[1]
         if v > 3.6:
             return bat[2]
@@ -45,6 +57,12 @@ def get_bat_color(bat):
 
 
 def render_battery(disp, bat):
+    """
+    Adds the battery indicator to the display. Does not call update or clear so it can be used in addition to
+    other display code.
+    :param disp: open display
+    :param bat: battery config tuple (boolean: indicator on/off, array: good rgb, array: ok rgb, array: bad rgb)
+    """
     c = get_bat_color(bat)
     if not c:
         return
@@ -53,6 +71,10 @@ def render_battery(disp, bat):
 
 
 def get_time():
+    """
+    Generates a nice timestamp in format hh:mm:ss from the devices localtime
+    :return: timestamp
+    """
     timestamp = ''
     if utime.localtime()[3] < 10:
         timestamp = timestamp + '0'
@@ -67,6 +89,10 @@ def get_time():
 
 
 def toggle_rockets(state):
+    """
+    Turns all rocked LEDs on or off.
+    :param state: True=on, False=off
+    """
     brightness = 15
     if not state:
         brightness = 0
@@ -76,6 +102,19 @@ def toggle_rockets(state):
 
 
 def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
+    """
+    Main function to render the nickname on screen.
+    Pretty ugly but not time for cleanup right now (and some APIs missing)
+    :param title: first row of text
+    :param sub: second row of text
+    :param fg: tuple of (day, night) rgb for title text color
+    :param bg: tuple of (day, night) rgb for title background color
+    :param fg_sub: tuple of (day, night) rgb for subtitle text color
+    :param bg_sub: tuple of (day, night) rgb for subtitle background color
+    :param main_bg: tuple of (day, night) rgb for general background color
+    :param mode: default animation to start in (index of ANIM_TYPES array)
+    :param bat: battery config tuple (boolean: indicator on/off, array: good rgb, array: ok rgb, array: bad rgb)
+    """
     anim = mode
     posy = 30
     if sub != '':
@@ -90,7 +129,7 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
         if sub == '#time':
             r_sub = get_time()
         dark = 0
-        if light_sensor.get_reading() < 40:
+        if light_sensor.get_reading() < 30:
             dark = 1
         r_fg_color = fg[dark]
         r_bg_color = bg[dark]
@@ -157,6 +196,13 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
 
 
 def get_key(json, key, default):
+    """
+    Gets a defined key from a json object or returns a default if the key cant be found
+    :param json: json object to search key in
+    :param key: key to search for
+    :param default: default to return if no key is found
+    :return:
+    """
     try:
         return json[key]
     except KeyError:
@@ -180,7 +226,7 @@ if FILENAME_ADV in os.listdir("."):
         battery_show = get_key(c, 'battery', True)
         battery_c_good = get_key(c, 'battery_color_good', [0, 230, 00])
         battery_c_ok = get_key(c, 'battery_color_ok', [255, 215, 0])
-        battery_c_bad = get_key(c, 'battery_color_bad', [255,0,0])
+        battery_c_bad = get_key(c, 'battery_color_bad', [255, 0, 0])
         # daytime values
         background = get_key(c, 'background', [0, 0, 0])
         fg_color = get_key(c, 'fg_color', [255, 255, 255])
