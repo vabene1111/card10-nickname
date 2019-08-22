@@ -1,14 +1,3 @@
-"""
-Improvement ideas
-- animations
-    - dvd
-    - rainbow
-    - led control
-    - fade effekt
-- led nick writing
-CA:4D:10
-CA:4D:10:8f:40:fc
-"""
 import utime
 import display
 import leds
@@ -20,7 +9,55 @@ import os
 
 FILENAME = 'nickname.txt'
 FILENAME_ADV = 'nickname.json'
-ANIM_TYPES = ['none', 'led', 'fade', 'gay']
+ANIM_TYPES = ['none', 'led', 'fade', 'gay', 'rainbow', 'rnd_led']
+
+
+def wheel(pos):
+    """
+    Taken from https://badge.team/projects/rainbow_name
+    Input a value 0 to 255 to get a color value.
+    The colours are a transition r - g - b - back to r.
+    :param pos: input position
+    :return: rgb value
+    """
+    if pos < 0:
+        return 0, 0, 0
+    if pos > 255:
+        pos -= 255
+    if pos < 85:
+        return int(255 - pos * 3), int(pos * 3), 0
+    if pos < 170:
+        pos -= 85
+        return 0, int(255 - pos * 3), int(pos * 3)
+    pos -= 170
+    return int(pos * 3), 0, int(255 - (pos * 3))
+
+
+def random_rgb():
+    """
+    Generates a random RGB value
+    :return: RGB array
+    """
+    rgb = []
+    for i in range(0, 3):
+        rand = int.from_bytes(os.urandom(1), 'little')
+        if rand > 255:
+            rand = 255
+        rgb.append(rand)
+    return rgb
+
+
+def blink_led(led):
+    """
+    Turns off leds, blinks given led for 100ms
+    can be used as an indicator
+    :param led: led to blink
+    """
+    leds.clear()
+    utime.sleep(0.1)
+    leds.set(led, [255, 0, 0])
+    utime.sleep(0.1)
+    leds.clear()
 
 
 def render_error(err1, err2):
@@ -122,6 +159,7 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
     r = 255
     g = 0
     b = 0
+    rainbow_led_pos = 0
     r_sub = sub
     last_btn_poll = utime.time() - 2
     while True:
@@ -146,24 +184,26 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
                 anim = anim + 1
                 if anim >= len(ANIM_TYPES):
                     anim = 0
+                blink_led(0)
             if pressed & buttons.BOTTOM_LEFT != 0:
                 anim = anim - 1
                 if anim < 0:
                     anim = len(ANIM_TYPES) - 1
+                blink_led(0)
         # Animations
         if ANIM_TYPES[anim] == 'fade':
             sleep = 0.1
             leds.clear()
             toggle_rockets(False)
             if r > 0 and b == 0:
-                r = r - 1
-                g = g + 1
+                r -= 1
+                g += 1
             if g > 0 and r == 0:
-                g = g - 1
-                b = b + 1
+                g -= 1
+                b += 1
             if b > 0 and g == 0:
-                r = r + 1
-                b = b - 1
+                r += 1
+                b -= 1
             r_bg = [r, g, b]
             r_bg_color = r_bg
             r_bg_sub_color = r_bg
@@ -177,9 +217,29 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
             else:
                 leds.clear()
                 toggle_rockets(False)
+        if ANIM_TYPES[anim] == 'rnd_led':
+            if dark == 1:
+                for i in range(0, 11):
+                    leds.prep(i, random_rgb())
+                leds.update()
+                leds.dim_top(4)
+                toggle_rockets(True)
+            else:
+                leds.clear()
+                toggle_rockets(False)
         if ANIM_TYPES[anim] == 'gay':
             toggle_rockets(False)
             leds.gay(0.4)
+        if ANIM_TYPES[anim] == 'rainbow':
+            for i in range(0, 11):
+                lr, lg, lb = wheel(rainbow_led_pos + i * 3)
+                leds.prep(i, [lr, lg, lb])
+            rainbow_led_pos += 1
+            if rainbow_led_pos > 255:
+                rainbow_led_pos = 0
+            leds.update()
+            leds.dim_top(3)
+            toggle_rockets(True)
         if ANIM_TYPES[anim] == 'none':
             leds.clear()
             toggle_rockets(False)

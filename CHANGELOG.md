@@ -1,5 +1,11 @@
 # Changelog
 
+**v1.2 - 22.08.2019 14:00**
+- effect improvements
+- new running rainbow effect
+- indicator light when switching effects
+- documentation improvements
+
 **v1.1 - 22.08.2019 08:00**
 - added battery indicator (only works with firmware version 1.3)
 
