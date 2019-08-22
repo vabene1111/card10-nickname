@@ -306,17 +306,16 @@ if FILENAME_ADV in os.listdir("."):
                         (battery_show, battery_c_good, battery_c_ok, battery_c_bad))
     except ValueError:
         render_error('invalid', 'json')
+elif FILENAME not in os.listdir("."):
+    render_error('file not', 'found')
 else:
-    if FILENAME not in os.listdir("."):
-        render_error('file not', 'found')
+    f = open(FILENAME, 'r')
+    nick = f.read()
+    f.close()
+    if len(nick) > 11:
+        render_error('name too', 'long')
+    if len(nick) < 1:
+        render_error('nick file', 'empty')
     else:
-        f = open(FILENAME, 'r')
-        nick = f.read()
-        f.close()
-        if len(nick) > 11:
-            render_error('name too', 'long')
-        if len(nick) < 1:
-            render_error('nick file', 'empty')
-        else:
-            render_nickname(nick, '', ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
-                            ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]))
+        render_nickname(nick, '', ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
+                        ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]))
