@@ -41,5 +41,5 @@ For more advanced nickname fun
 4. Boot into normal mode
 5. Start the nickname.py app
 
-You can also use `#timme` as a subtitle to display the current time underneath your nickname. 
+You can also use `#time` as a subtitle to display the current time underneath your nickname. 
 **Note** This is currently WIP since you cannot eaisly set the system time.
