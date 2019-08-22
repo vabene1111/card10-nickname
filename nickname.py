@@ -32,6 +32,21 @@ def render_error(err1, err2):
         disp.close()
 
 
+def get_bat_color(bat):
+    v = os.read_battery()
+    if v > 3.9:
+        return bat[1]
+    if v > 3.6:
+        return bat[2]
+    return bat[3]
+
+
+def render_battery(disp, bat):
+    c = get_bat_color(bat)
+    disp.rect(140, 2, 155, 9, filled=True, col=c)
+    disp.rect(155, 4, 157, 7, filled=True, col=c)
+
+
 def get_time():
     timestamp = ''
     if utime.localtime()[3] < 10:
@@ -55,8 +70,8 @@ def toggle_rockets(state):
     leds.set_rocket(2, brightness)
 
 
-def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg):
-    anim = 0
+def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
+    anim = mode
     posy = 30
     if sub != '':
         posy = 18
@@ -126,6 +141,8 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg):
             toggle_rockets(False)
         with display.open() as disp:
             disp.rect(0, 0, 160, 80, col=r_bg, filled=True)
+            if bat[0]:
+                render_battery(disp, bat)
             disp.print(title, fg=r_fg_color, bg=r_bg_color, posx=80 - round(len(title) / 2 * 14), posy=posy)
             if r_sub != '':
                 disp.print(r_sub, fg=r_fg_sub_color, bg=r_bg_sub_color, posx=80 - round(len(r_sub) / 2 * 14), posy=42)
@@ -140,6 +157,7 @@ def get_key(json, key, default):
     except KeyError:
         return default
 
+
 leds.clear()
 with display.open() as disp:
     disp.clear().update()
@@ -152,6 +170,12 @@ if FILENAME_ADV in os.listdir("."):
         # parse config
         nick = get_key(c, 'nickname', 'no nick')
         sub = get_key(c, 'subtitle', '')
+        mode = get_key(c, 'mode', 0)
+        # battery
+        battery_show = get_key(c, 'battery', True)
+        battery_c_good = get_key(c, 'battery_color_good', [0, 230, 00])
+        battery_c_ok = get_key(c, 'battery_color_ok', [255, 215, 0])
+        battery_c_bad = get_key(c, 'battery_color_bad', [255,0,0])
         # daytime values
         background = get_key(c, 'background', [0, 0, 0])
         fg_color = get_key(c, 'fg_color', [255, 255, 255])
@@ -167,7 +191,8 @@ if FILENAME_ADV in os.listdir("."):
         # render nickname
         render_nickname(nick, sub, (fg_color, fg_color_night), (bg_color, bg_color_night),
                         (fg_sub_color, fg_sub_color_night), (bg_sub_color, bg_sub_color_night),
-                        (background, background_night))
+                        (background, background_night), mode,
+                        (battery_show, battery_c_good, battery_c_ok, battery_c_bad))
     except ValueError:
         render_error('invalid', 'json')
 else:

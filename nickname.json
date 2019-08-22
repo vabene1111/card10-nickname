@@ -12,5 +12,10 @@
   "fg_color_night": [153,186,0],
   "bg_color_night": [53,53,53],
   "fg_sub_color_night": [111,135,0],
-  "bg_sub_color_night": [53,53,53]
+  "bg_sub_color_night": [53,53,53],
+
+  "battery": false,
+  "battery_color_good": [0,255,0],
+  "battery_color_ok": [255,215,0],
+  "battery_color_bad": [255,0,0]
 }
