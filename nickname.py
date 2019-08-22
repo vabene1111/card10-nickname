@@ -33,16 +33,21 @@ def render_error(err1, err2):
 
 
 def get_bat_color(bat):
-    v = os.read_battery()
-    if v > 3.9:
-        return bat[1]
-    if v > 3.6:
-        return bat[2]
-    return bat[3]
+    try:
+        v = os.read_battery()
+        if v > 3.9:
+            return bat[1]
+        if v > 3.6:
+            return bat[2]
+        return bat[3]
+    except AttributeError:
+        return False
 
 
 def render_battery(disp, bat):
     c = get_bat_color(bat)
+    if not c:
+        return
     disp.rect(140, 2, 155, 9, filled=True, col=c)
     disp.rect(155, 4, 157, 7, filled=True, col=c)
 

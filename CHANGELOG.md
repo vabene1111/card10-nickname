@@ -1,5 +1,8 @@
 # Changelog
 
+**v1.1 - 22.08.2019 08:00**
+- added battery indicator (only works with firmware version 1.3)
+
 **v1.0 - 21.08.2019 19:40**
 - in advanced mode if `subtitle` is set to `#time` the current time will be displayed under the nickname 
 > this is WIP as setting the current time is a little tricky right now
