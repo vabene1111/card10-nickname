@@ -270,9 +270,6 @@ def get_key(json, key, default):
 
 
 leds.clear()
-with display.open() as disp:
-    disp.clear().update()
-    disp.close()
 if FILENAME_ADV in os.listdir("."):
     f = open(FILENAME_ADV, 'r')
     try:
@@ -281,7 +278,7 @@ if FILENAME_ADV in os.listdir("."):
         # parse config
         nick = get_key(c, 'nickname', 'no nick')
         sub = get_key(c, 'subtitle', '')
-        mode = get_key(c, 'mode', 0)
+        mode = get_key(c, 'mode', 1)
         # battery
         battery_show = get_key(c, 'battery', True)
         battery_c_good = get_key(c, 'battery_color_good', [0, 230, 00])
@@ -314,8 +311,19 @@ else:
     f.close()
     if len(nick) > 11:
         render_error('name too', 'long')
-    if len(nick) < 1:
+    elif len(nick) < 1:
         render_error('nick file', 'empty')
     else:
         render_nickname(nick, '', ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
                         ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]))
+        f = open(FILENAME, 'r')
+        nick = f.read()
+        f.close()
+        if len(nick) > 11:
+            render_error('name too', 'long')
+        if len(nick) < 1:
+            render_error('nick file', 'empty')
+        else:
+            render_nickname(nick, '', ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
+                            ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]), 1,
+                            (True, [0, 230, 00], [255, 215, 0], [255, 0, 0]))
