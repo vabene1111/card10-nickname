@@ -10,6 +10,7 @@ import os
 FILENAME = 'nickname.txt'
 FILENAME_ADV = 'nickname.json'
 ANIM_TYPES = ['none', 'led', 'fade', 'gay', 'rainbow', 'rnd_led']
+LINE_POSYS = [ [30], [18, 42], [4, 28, 52], [0, 20, 40, 60]]
 
 
 def wheel(pos):
@@ -153,9 +154,6 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
     :param bat: battery config tuple (boolean: indicator on/off, array: good rgb, array: ok rgb, array: bad rgb)
     """
     anim = mode
-    posy = 30
-    if sub != '':
-        posy = 18
     r = 255
     g = 0
     b = 0
@@ -164,8 +162,10 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
     last_btn_poll = utime.time() - 2
     while True:
         sleep = 0.5
-        if sub == '#time':
-            r_sub = get_time()
+        r_sub = sub.copy()
+        for i, line in enumerate(sub):
+            if line == '#time':
+                r_sub[i] = get_time()
         dark = 0
         if light_sensor.get_reading() < 30:
             dark = 1
@@ -247,9 +247,17 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
             disp.rect(0, 0, 160, 80, col=r_bg, filled=True)
             if bat[0]:
                 render_battery(disp, bat)
-            disp.print(title, fg=r_fg_color, bg=r_bg_color, posx=80 - round(len(title) / 2 * 14), posy=posy)
-            if r_sub != '':
-                disp.print(r_sub, fg=r_fg_sub_color, bg=r_bg_sub_color, posx=80 - round(len(r_sub) / 2 * 14), posy=42)
+            num_lines = len(title) + len(r_sub)
+            posys = LINE_POSYS[num_lines - 1]
+            i = 0
+            for line in title:
+                disp.print(line, fg=r_fg_color, bg=r_bg_color, posx=80 -
+                           round(len(line) / 2 * 14), posy=posys[i])
+                i += 1
+            for line in r_sub:
+                disp.print(line, fg=r_fg_sub_color, bg=r_bg_sub_color,
+                           posx=80 - round(len(line) / 2 * 14), posy=posys[i])
+                i += 1
             disp.update()
             disp.close()
         utime.sleep(sleep)
@@ -269,6 +277,34 @@ def get_key(json, key, default):
         return default
 
 
+def split_lines(line, maxlen):
+    """
+    Split a long line into multiple lines
+    Splits at spaces only, the space where split is removed. Stripping off of
+    further spaces at start and end is deliberately not done to allow
+    creativity even without explicit multi-lines.
+    :param line: line to split
+    :param maxlen: maximum line length in result
+    :return: A list of lines fitting within the maximum
+    """
+    lines = []
+    left = line
+    while len(left) > maxlen:
+        found = False
+        for i in range(maxlen, 0, -1):
+            if left[i] == ' ':
+                lines.append(left[0:i])
+                left = left[i+1:]
+                found = True
+                break
+        if not found:
+            lines.append(left[0:maxlen])
+            left = left[maxlen:]
+    if left:
+        lines.append(left)
+    return lines
+
+
 leds.clear()
 with display.open() as disp:
     disp.clear().update()
@@ -280,7 +316,11 @@ if FILENAME_ADV in os.listdir("."):
         f.close()
         # parse config
         nick = get_key(c, 'nickname', 'no nick')
-        sub = get_key(c, 'subtitle', '')
+        if isinstance(nick, str):
+            nick = split_lines(nick, 11)[0:4]
+        sub = get_key(c, 'subtitle', [])
+        if isinstance(sub, str):
+            sub = split_lines(sub, 11)[0:4]
         mode = get_key(c, 'mode', 0)
         # battery
         battery_show = get_key(c, 'battery', True)
@@ -313,8 +353,10 @@ else:
         f = open(FILENAME, 'r')
         nick = f.read()
         f.close()
-        if len(nick) > 11:
+        nick = split_lines(nick, 11)
+        if len(nick) > 4:
             render_error('name too', 'long')
+            nick = nick[0:4]
         if len(nick) < 1:
             render_error('nick file', 'empty')
         else:
