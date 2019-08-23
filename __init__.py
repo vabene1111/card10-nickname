@@ -6,11 +6,27 @@ import buttons
 import light_sensor
 import ujson
 import os
+import personal_state
 
 FILENAME = 'nickname.txt'
 FILENAME_ADV = 'nickname.json'
 ANIM_TYPES = ['none', 'led', 'fade', 'gay', 'rainbow', 'rnd_led']
 
+
+PERSONAL_STATES = [
+    personal_state.NO_STATE, personal_state.NO_CONTACT,
+    personal_state.CHAOS, personal_state.COMMUNICATION,
+    personal_state.CAMP
+    ]
+
+
+def cycle_personal_state():
+    state, _ = personal_state.get()
+    state_i = PERSONAL_STATES.index(state)
+    state_i += 1
+    if state_i >= len(PERSONAL_STATES):
+        state_i = 0
+    personal_state.set(PERSONAL_STATES[state_i], True)
 
 def wheel(pos):
     """
@@ -176,7 +192,7 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
         r_bg = main_bg[dark]
         # Button handling
         pressed = buttons.read(
-            buttons.BOTTOM_LEFT | buttons.BOTTOM_RIGHT
+            buttons.BOTTOM_LEFT | buttons.BOTTOM_RIGHT | buttons.TOP_RIGHT
         )
         if utime.time() - last_btn_poll >= 1:
             last_btn_poll = utime.time()
@@ -190,6 +206,8 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
                 if anim < 0:
                     anim = len(ANIM_TYPES) - 1
                 blink_led(0)
+            if pressed & buttons.TOP_RIGHT:
+                cycle_personal_state()
         # Animations
         if ANIM_TYPES[anim] == 'fade':
             sleep = 0.1
