@@ -11,14 +11,13 @@ import personal_state
 FILENAME = 'nickname.txt'
 FILENAME_ADV = 'nickname.json'
 ANIM_TYPES = ['none', 'led', 'fade', 'gay', 'rainbow', 'rnd_led']
-LINE_POSYS = [ [30], [18, 42], [4, 28, 52], [0, 20, 40, 60]]
-
+LINE_POSYS = [[30], [18, 42], [4, 28, 52], [0, 20, 40, 60]]
 
 PERSONAL_STATES = [
     personal_state.NO_STATE, personal_state.NO_CONTACT,
     personal_state.CHAOS, personal_state.COMMUNICATION,
     personal_state.CAMP
-    ]
+]
 
 
 def cycle_personal_state():
@@ -28,6 +27,7 @@ def cycle_personal_state():
     if state_i >= len(PERSONAL_STATES):
         state_i = 0
     personal_state.set(PERSONAL_STATES[state_i], True)
+
 
 def wheel(pos):
     """
@@ -174,11 +174,10 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
     g = 0
     b = 0
     rainbow_led_pos = 0
-    r_sub = sub
     last_btn_poll = utime.time() - 2
     while True:
         sleep = 0.5
-        r_sub = sub.copy()
+        r_sub = sub
         for i, line in enumerate(sub):
             if line == '#time':
                 r_sub[i] = get_time()
@@ -270,7 +269,7 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
             i = 0
             for line in title:
                 disp.print(line, fg=r_fg_color, bg=r_bg_color, posx=80 -
-                           round(len(line) / 2 * 14), posy=posys[i])
+                                                                    round(len(line) / 2 * 14), posy=posys[i])
                 i += 1
             for line in r_sub:
                 disp.print(line, fg=r_fg_sub_color, bg=r_bg_sub_color,
@@ -312,7 +311,7 @@ def split_lines(line, maxlen):
         for i in range(maxlen, 0, -1):
             if left[i] == ' ':
                 lines.append(left[0:i])
-                left = left[i+1:]
+                left = left[i + 1:]
                 found = True
                 break
         if not found:
@@ -372,8 +371,6 @@ else:
     elif len(nick) < 1:
         render_error('nick file', 'empty')
     else:
-        render_nickname(nick, '', ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
-                        ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]))
         f = open(FILENAME, 'r')
         nick = f.read()
         f.close()
@@ -384,6 +381,7 @@ else:
         if len(nick) < 1:
             render_error('nick file', 'empty')
         else:
+            test = ''
             render_nickname(nick, '', ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
                             ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]), 1,
                             (True, [0, 230, 00], [255, 215, 0], [255, 0, 0]))
