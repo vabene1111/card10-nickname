@@ -1,5 +1,8 @@
 # Changelog
 
+**v1.2.2 - 23.08.2019 22:15**
+- fixed simple nickname not displaying correctly
+
 **v1.2 - 22.08.2019 14:00**
 - effect improvements
 - new running rainbow effect
