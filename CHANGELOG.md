@@ -1,6 +1,9 @@
 # Changelog
 
 **v1.2.2 - 23.08.2019 22:15**
+- use select button to display personal state
+- added better support for longer lines (splitting)
+- performance optimization
 - fixed simple nickname not displaying correctly
 
 **v1.2 - 22.08.2019 14:00**
