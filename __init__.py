@@ -306,9 +306,6 @@ def split_lines(line, maxlen):
 
 
 leds.clear()
-with display.open() as disp:
-    disp.clear().update()
-    disp.close()
 if FILENAME_ADV in os.listdir("."):
     f = open(FILENAME_ADV, 'r')
     try:
@@ -346,10 +343,19 @@ if FILENAME_ADV in os.listdir("."):
                         (battery_show, battery_c_good, battery_c_ok, battery_c_bad))
     except ValueError:
         render_error('invalid', 'json')
+elif FILENAME not in os.listdir("."):
+    render_error('file not', 'found')
 else:
-    if FILENAME not in os.listdir("."):
-        render_error('file not', 'found')
+    f = open(FILENAME, 'r')
+    nick = f.read()
+    f.close()
+    if len(nick) > 11:
+        render_error('name too', 'long')
+    elif len(nick) < 1:
+        render_error('nick file', 'empty')
     else:
+        render_nickname(nick, '', ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
+                        ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]))
         f = open(FILENAME, 'r')
         nick = f.read()
         f.close()
@@ -361,5 +367,5 @@ else:
             render_error('nick file', 'empty')
         else:
             render_nickname(nick, '', ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
-                            ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]),
-                            0, (True, [0, 230, 00], [255, 215, 0], [255, 0, 0]))
+                            ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]), 1,
+                            (True, [0, 230, 00], [255, 215, 0], [255, 0, 0]))
