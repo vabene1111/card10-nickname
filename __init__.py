@@ -177,7 +177,7 @@ def render_nickname(title, sub, fg, bg, fg_sub, bg_sub, main_bg, mode, bat):
     last_btn_poll = utime.time() - 2
     while True:
         sleep = 0.5
-        r_sub = sub
+        r_sub = sub.copy()
         for i, line in enumerate(sub):
             if line == '#time':
                 r_sub[i] = get_time()
