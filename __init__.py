@@ -366,21 +366,12 @@ else:
     f = open(FILENAME, 'r')
     nick = f.read()
     f.close()
-    if len(nick) > 11:
+    nick = split_lines(nick, 11)
+    if len(nick) > 4:
         render_error('name too', 'long')
-    elif len(nick) < 1:
+    elif not nick:
         render_error('nick file', 'empty')
     else:
-        f = open(FILENAME, 'r')
-        nick = f.read()
-        f.close()
-        nick = split_lines(nick, 11)
-        if len(nick) > 4:
-            render_error('name too', 'long')
-            nick = nick[0:4]
-        if len(nick) < 1:
-            render_error('nick file', 'empty')
-        else:
-            render_nickname(nick, [], ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
-                            ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]), 1,
-                            (True, [0, 230, 00], [255, 215, 0], [255, 0, 0]))
+        render_nickname(nick, [], ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]),
+                        ([255, 255, 255], [255, 255, 255]), ([0, 0, 0], [0, 0, 0]), ([0, 0, 0], [0, 0, 0]), 1,
+                        (True, [0, 230, 00], [255, 215, 0], [255, 0, 0]))
