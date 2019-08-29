@@ -1,6 +1,11 @@
 # Changelog
 
-**v1.2.2 - 23.08.2019 22:15**
+**v1.2.2 - 29.08.2019**
+
+- fixed various issues introduced in v1.2.1
+
+**v1.2.1 - 23.08.2019 22:15**
+
 - use select button to display personal state
 - added better support for longer lines (splitting)
 - performance optimization
